@@ -1,10 +1,17 @@
+from email.mime import image
 from fileinput import filename
+import imp
+from urllib import response
 from flask import Flask, render_template, request, redirect, url_for, session,Response,send_file
 from flask_mysqldb import MySQL
 import MySQLdb.cursors
 import re
 import os 
 import RSA.rsa as rsa
+import socket
+import server
+import threading
+
 
 app = Flask(__name__)
 
@@ -20,6 +27,26 @@ app.config['MYSQL_DB'] = 'cryto'
 # Intialize MySQL
 mysql = MySQL(app)
 
+t1=threading.Thread(target=server.do)
+t1.start()
+
+
+
+def send_message(msg):
+        ClientSocket = socket.socket()
+        host = '127.0.0.1'
+        port = 9999
+        try:
+            ClientSocket.connect((host, port))
+        except socket.error as e:
+            print(str(e))
+        ClientSocket.send('test'.encode())
+        resp = ClientSocket.recv(1024)
+        if(resp.decode() !=""):
+            return resp.decode()
+        ClientSocket.close()
+
+
 
 @app.route('/', methods=['GET', 'POST'])
 def login():
@@ -31,15 +58,15 @@ def login():
         password = request.form['password']
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cursor.execute('SELECT * FROM accounts WHERE username = %s AND password = %s', (username, password,))
-        # Fetch one record and return result
-        account = cursor.fetchone()
+        # Fetch all records and return result
+        account =cursor.fetchone()
         if account:
             # Create session data, we can access this data in other routes
             session['loggedin'] = True
             session['id'] = account['id']
             session['username'] = account['username']
             # Redirect to home page
-            return 'Logged in successfully!'
+            return redirect('/chat')
         else:
             # Account doesnt exist or username/password incorrect
             msg = 'Incorrect username/password!'
@@ -107,5 +134,29 @@ def register():
     
     return render_template('register.html', msg=msg,file=file)
 
+
+
+
     
+
+@app.route('/chat', methods=['GET', 'POST'])
+def chat():
+
+    if request.method == 'POST' and 'username' in request.form:
+        id=request.form['username']
+        image_file = request.files['file']
+        send_message(id)
+        
+
+
+    # Check if user is loggedin
+    if 'loggedin' in session:
+        # User is loggedin show them the home page
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute('SELECT * FROM accounts WHERE username != %s', (session['username'],))
+        account = cursor.fetchall()
+        return render_template('chat.html', username=session['username'],account=account)
+    # User is not loggedin redirect to login page
+    return redirect(url_for('login'))
+
 
