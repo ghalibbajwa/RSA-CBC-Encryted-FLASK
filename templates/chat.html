@@ -17,7 +17,7 @@
 
 <body style="background-color: #4CAF50;">
     <div class="container">
-        <form id="contact" action="{{ url_for('chat') }}"  method="post">
+        <form id="contact" action="{{ url_for('chat') }}"  method="post"  enctype="multipart/form-data">
             <h3>Select an Image to Send</h3>
             <fieldset>
 
@@ -30,11 +30,12 @@
                 </select>
             </fieldset>
             <br>
-            <input name="image" type="file" accept="image/*" onchange="loadFile(event)">
+            <p>{{ session['message'] }}</p>
+            <input name="file" type="file" accept="image/*" method="post" onchange="loadFile(event)">
             <img id="output" style="height: 200px; margin: 4px;"/>
             <br>
             <fieldset>
-                <button name="submit" type="submit" id="contact-submit" data-submit="...Sending">Send</button>
+                <button  type="submit" value="Upload" id="contact-submit" data-submit="...Sending">Send</button>
             </fieldset>
         </form>
     </div>
@@ -53,8 +54,9 @@
             var loadFile = function(event) {
               var output = document.getElementById('output');
               output.src = URL.createObjectURL(event.target.files[0]);
+              console.log(output.src);
               output.onload = function() {
-                URL.revokeObjectURL(output.src) // free memory
+                //URL.revokeObjectURL(output.src) // free memory
               }
             };
           </script>

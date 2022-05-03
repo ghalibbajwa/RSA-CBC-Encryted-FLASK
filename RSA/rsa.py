@@ -92,30 +92,21 @@ def chooseKeys():
     f_private.write(str(d) + '\n')
     f_private.close()
 
-def encrypt(message, file_name = 'public_keys.txt', block_size = 2):
-    """
-    Encrypts a message (string) by raising each character's ASCII value to the 
-    power of e and taking the modulus of n. Returns a string of numbers.
-    file_name refers to file where the public key is located. If a file is not 
-    provided, it assumes that we are encrypting the message using our own 
-    public keys. Otherwise, it can use someone else's public key, which is 
-    stored in a different file.
-    block_size refers to how many characters make up one group of numbers in 
-    each index of encrypted_blocks.
-    """
+def encrypt(message, n,e, block_size = 2):
+    # """
+    # Encrypts a message (string) by raising each character's ASCII value to the 
+    # power of e and taking the modulus of n. Returns a string of numbers.
+    # file_name refers to file where the public key is located. If a file is not 
+    # provided, it assumes that we are encrypting the message using our own 
+    # public keys. Otherwise, it can use someone else's public key, which is 
+    # stored in a different file.
+    # block_size refers to how many characters make up one group of numbers in 
+    # each index of encrypted_blocks.
+    # """
 
-    try:
-        fo = open(file_name, 'r')
-
-    # check for the possibility that the user tries to encrypt something
-    # using a public key that is not found
-    except FileNotFoundError:
-        print('That file is not found.')
-    else:
-        n = int(fo.readline())
-        e = int(fo.readline())
-        fo.close()
-
+    
+        n=int(n)
+        e=int(e)
         encrypted_blocks = []
         ciphertext = -1
 
@@ -191,32 +182,3 @@ def new_key():
     Creates a new public and private key pair.
     """
     chooseKeys()
-
-# def main():
-#     # we select our primes and generate our public and private keys,
-#     # usually done once
-#     choose_again = input('Do you want to generate new public and private keys? (y or n) ')
-#     if (choose_again == 'y'):
-#         chooseKeys()
-
-#     instruction = input('Would you like to encrypt or decrypt? (Enter e or d): ')
-#     if (instruction == 'e'):
-#         message = input('What would you like to encrypt?\n')
-#         option = input('Do you want to encrypt using your own public key? (y or n) ')
-
-#         if (option == 'y'):
-#             print('Encrypting...')
-#             print(encrypt(message))
-#         else:
-#             file_option = input('Enter the file name that stores the public key: ')
-#             print('Encrypting...')
-#             print(encrypt(message, file_option))
-
-#     elif (instruction == 'd'):
-#         message = input('What would you like to decrypt?\n')
-#         print('Decryption...')
-#         print(decrypt(message))
-#     else:
-#         print('That is not a proper instruction.')
-
-# main()

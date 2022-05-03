@@ -1,8 +1,13 @@
-from email.mime import image
+from distutils.log import debug
+from email import message
+from email.mime import base, image
 from fileinput import filename
 import imp
+from itertools import count
+import json
+from pydoc import cli
 from urllib import response
-from flask import Flask, render_template, request, redirect, url_for, session,Response,send_file
+from flask import Flask, jsonify, render_template, request, redirect, url_for, session,Response,send_file
 from flask_mysqldb import MySQL
 import MySQLdb.cursors
 import re
@@ -11,6 +16,21 @@ import RSA.rsa as rsa
 import socket
 import server
 import threading
+import client
+from PIL import Image
+import numpy as np
+import string    
+import random
+import RowTranspose.RT as RT
+import concurrent.futures
+from multiprocessing.pool import ThreadPool
+import sys
+import ast
+import base64
+import Vig.vig as vig
+
+
+
 
 
 app = Flask(__name__)
@@ -32,20 +52,22 @@ t1.start()
 
 
 
-def send_message(msg):
-        ClientSocket = socket.socket()
-        host = '127.0.0.1'
-        port = 9999
-        try:
-            ClientSocket.connect((host, port))
-        except socket.error as e:
-            print(str(e))
-        ClientSocket.send('test'.encode())
-        resp = ClientSocket.recv(1024)
-        if(resp.decode() !=""):
-            return resp.decode()
-        ClientSocket.close()
 
+mess='' 
+def put_session(message):
+    global mess
+    mess = message
+    
+
+def generate_key():
+   count = 0
+   key=''
+   while count!=15:
+    ran = ''.join(random.choices(string.ascii_uppercase , k = 1)) 
+    if(ran not in key):
+        key+=ran
+        count+=1
+   return key
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -141,11 +163,53 @@ def register():
 
 @app.route('/chat', methods=['GET', 'POST'])
 def chat():
+    
+    if(mess!=''):
+        print(mess,file=sys.stderr)
+        
+        keylen=mess[0]+""+mess[1]
+        
+        keylen=int(keylen)
+        key=mess[2:keylen+2]
+        
+        key=rsa.decrypt(key)
+        message=RT.decryptMessage(mess[keylen+2:],key)
+        
+        print(message,file=sys.stderr)
+        image=ast.literal_eval(message)
+        # fh = open("imageToSave.png", "wb")
+        # fh.write(message.decode('base64'))
+        print(image,file=sys.stderr)
+
+
+
 
     if request.method == 'POST' and 'username' in request.form:
         id=request.form['username']
-        image_file = request.files['file']
-        send_message(id)
+        file = request.files['file']
+        image=Image.open(file)
+        #data = asarray(image)
+        #data=str(data)
+        #data=data.strip('\n')
+        #data=base64.b64encode(file.read())
+        data=np.array(image)
+        key=generate_key()
+        data=data.tobytes()
+        
+        enc=RT.encryptMessage(str(data),key)
+        #enc=vig.cipherText(str(data),key)
+       
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute('SELECT * FROM accounts WHERE id = %s', (id,))
+        account = cursor.fetchone()
+        if account:
+            n=account.get('n')
+            e=account.get('e')
+            key=rsa.encrypt(key,e,n)
+            message=str(len(str(key)))+""+str(key)+""+str(enc)
+            
+            client.do(message)
+        
         
 
 
@@ -158,5 +222,4 @@ def chat():
         return render_template('chat.html', username=session['username'],account=account)
     # User is not loggedin redirect to login page
     return redirect(url_for('login'))
-
 
