@@ -17,12 +17,12 @@
 
 <body style="background-color: #4CAF50;">
     <div class="container">
-        <form id="contact" action="{{ url_for('chat') }}"  method="post"  enctype="multipart/form-data">
+        <form id="contact" action="{{ url_for('chat') }}" method="post" enctype="multipart/form-data">
             <h3>Select an Image to Send</h3>
             <fieldset>
 
                 <select name="username" class="form-select container" aria-label="Default select example">
-                    <option  selected disabled>Select User to Send</option>
+                    <option selected disabled>Select User to Send</option>
 
                     {% for account in account %}
                     <option value="{{ account.id }}">{{ account.username }}</option>
@@ -32,13 +32,31 @@
             <br>
             <p>{{ session['message'] }}</p>
             <input name="file" type="file" accept="image/*" method="post" onchange="loadFile(event)">
-            <img id="output" style="height: 200px; margin: 4px;"/>
+            <img id="output" style="height: 200px; margin: 4px;" />
             <br>
             <fieldset>
-                <button  type="submit" value="Upload" id="contact-submit" data-submit="...Sending">Send</button>
+                <button type="submit" value="Upload" id="contact-submit" data-submit="...Sending">Send</button>
             </fieldset>
         </form>
     </div>
+
+    <div class="container">
+        <form id="contact" action="{{ url_for('chat') }}" method="post" enctype="multipart/form-data">
+            <h3>Decrypt image</h3>
+            {% if session['message'] !='' %}
+            <p>You have an Image in Inbox</p>
+            <br>
+            
+            {% endif %}
+            <input name="dec" value="yes" type="hidden">
+            <img href="../image.png" style="height: 200px; margin: 4px;" />
+            <br>
+            <fieldset>
+                <button type="submit" value="Upload" id="contact-submit" data-submit="...Sending">Decrypt</button>
+            </fieldset>
+        </form>
+    </div>
+
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
@@ -50,16 +68,16 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.min.js"
         integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
         crossorigin="anonymous"></script>
-        <script>
-            var loadFile = function(event) {
-              var output = document.getElementById('output');
-              output.src = URL.createObjectURL(event.target.files[0]);
-              console.log(output.src);
-              output.onload = function() {
+    <script>
+        var loadFile = function (event) {
+            var output = document.getElementById('output');
+            output.src = URL.createObjectURL(event.target.files[0]);
+            console.log(output.src);
+            output.onload = function () {
                 //URL.revokeObjectURL(output.src) // free memory
-              }
-            };
-          </script>
+            }
+        };
+    </script>
 </body>
 
 </html>

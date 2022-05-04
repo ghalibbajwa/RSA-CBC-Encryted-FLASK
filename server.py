@@ -18,7 +18,7 @@ def do():
     conn, addr = s.accept()
     conn.send('Connected to server'.encode())
    
-    incoming_message = conn.recv(1024)
+    incoming_message = conn.recv(999999)
     incoming_message = incoming_message.decode()
     if(incoming_message != ''):
         main.put_session(incoming_message)

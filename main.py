@@ -28,7 +28,7 @@ import sys
 import ast
 import base64
 import Vig.vig as vig
-
+import io
 
 
 
@@ -60,14 +60,11 @@ def put_session(message):
     
 
 def generate_key():
-   count = 0
-   key=''
-   while count!=15:
-    ran = ''.join(random.choices(string.ascii_uppercase , k = 1)) 
-    if(ran not in key):
-        key+=ran
-        count+=1
-   return key
+    
+   LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+   key = list(LETTERS)
+   random.shuffle(key)
+   return ''.join(key)
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -163,23 +160,28 @@ def register():
 
 @app.route('/chat', methods=['GET', 'POST'])
 def chat():
-    
+
     if(mess!=''):
-        print(mess,file=sys.stderr)
-        
-        keylen=mess[0]+""+mess[1]
-        
-        keylen=int(keylen)
-        key=mess[2:keylen+2]
-        
-        key=rsa.decrypt(key)
-        message=RT.decryptMessage(mess[keylen+2:],key)
-        
-        print(message,file=sys.stderr)
-        image=ast.literal_eval(message)
-        # fh = open("imageToSave.png", "wb")
-        # fh.write(message.decode('base64'))
-        print(image,file=sys.stderr)
+        session['message']=mess
+        if request.method == 'POST' and 'dec' in request.form:
+            keylen=mess[0]+""+mess[1]
+            
+            keylen=int(keylen)
+            key=mess[2:keylen+2]
+            
+            key=rsa.decrypt(key)
+            #message=RT.decrypt(mess[keylen+2:],key)
+            message=RT.decryptMessage(key,mess[keylen+2:])
+            
+
+            print(message,file=sys.stderr)
+            
+
+            image=ast.literal_eval(message)
+            image=np.array(image)
+            image=Image.fromarray((image).astype(np.uint8)).save("image.png")
+
+            #print(image,file=sys.stderr)
 
 
 
@@ -192,11 +194,14 @@ def chat():
         #data=str(data)
         #data=data.strip('\n')
         #data=base64.b64encode(file.read())
-        data=np.array(image)
+        #data=np.array(image)
         key=generate_key()
-        data=data.tobytes()
+        data=np.array(image)
+        data=data.tolist()
         
-        enc=RT.encryptMessage(str(data),key)
+
+        
+        enc=RT.encryptMessage(key,str(data))
         #enc=vig.cipherText(str(data),key)
        
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
