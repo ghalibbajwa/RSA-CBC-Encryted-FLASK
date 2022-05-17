@@ -2,9 +2,9 @@ import socket
 import sys
 import time
  
-def do(message):
+def do(message,host):
     s = socket.socket()
-    host = 'Ghalib'
+    host = host
     port = 8080
     s.connect((host,port))
     print(" Connected to chat server")

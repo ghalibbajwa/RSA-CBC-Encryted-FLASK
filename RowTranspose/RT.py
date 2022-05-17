@@ -1,10 +1,10 @@
 import sys, random
 
-LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+LETTERS = '1234567890[]{}|!@#$%^&*()_+-=<>?/.,'
 
 def translateMessage(key, message, mode):
     translated = ''
-    charsA = LETTERS
+    charsA = '1234567890[]{}|!@#$%^&*()_+-=<>?/.,'
     charsB = key
     if mode == 'decrypt':
         # For decrypting, we can use the same code as encrypting. We
