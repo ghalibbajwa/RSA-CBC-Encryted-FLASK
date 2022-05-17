@@ -29,7 +29,8 @@ import ast
 import base64
 import Vig.vig as vig
 import io
-
+import socket
+import Cipher.cipher as cipher
 
 
 
@@ -43,6 +44,7 @@ app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
 app.config['MYSQL_PASSWORD'] = ''
 app.config['MYSQL_DB'] = 'cryto'
+app.config["SESSION_TYPE"] = "filesystem"
 
 # Intialize MySQL
 mysql = MySQL(app)
@@ -61,10 +63,11 @@ def put_session(message):
 
 def generate_key():
     
-   LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-   key = list(LETTERS)
+   
+   num = "0,1,2,3,4,5,6,7,8,9"
+   key = []
    random.shuffle(key)
-   return ''.join(key)
+   return key
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -79,7 +82,11 @@ def login():
         cursor.execute('SELECT * FROM accounts WHERE username = %s AND password = %s', (username, password,))
         # Fetch all records and return result
         account =cursor.fetchone()
+        
         if account:
+            hostname = socket.gethostname()
+            cursor.execute('UPDATE accounts SET hostname = %s WHERE id = %s', (hostname,account['id'],))
+            mysql.connection.commit()
             # Create session data, we can access this data in other routes
             session['loggedin'] = True
             session['id'] = account['id']
@@ -162,7 +169,7 @@ def register():
 def chat():
 
     if(mess!=''):
-        session['message']=mess
+        #session['message']=mess
         if request.method == 'POST' and 'dec' in request.form:
             keylen=mess[0]+""+mess[1]
             
@@ -201,8 +208,9 @@ def chat():
         
 
         
-        enc=RT.encryptMessage(key,str(data))
+        #enc=RT.encryptMessage(key,str(data))
         #enc=vig.cipherText(str(data),key)
+        enc=cipher.encrypt(str(data),key)
        
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cursor.execute('SELECT * FROM accounts WHERE id = %s', (id,))
@@ -210,10 +218,11 @@ def chat():
         if account:
             n=account.get('n')
             e=account.get('e')
+            
             key=rsa.encrypt(key,e,n)
             message=str(len(str(key)))+""+str(key)+""+str(enc)
             
-            client.do(message)
+            client.do(message, str(account['hostname']))
         
         
 
