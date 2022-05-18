@@ -35,6 +35,7 @@ import Cipher.cipher as cipher
 
 
 app = Flask(__name__)
+app.run(debug=True)
 
 # Change this to your secret key (can be anything, it's for extra protection)
 app.secret_key = 'your secret key'
@@ -64,12 +65,15 @@ def put_session(message):
 def generate_key():
     
    
-   num = "0,1,2,3,4,5,6,7,8,9"
-   key = []
+   num = [0,1,2,3,4,5,6,7,8,9]
+   key = num
    random.shuffle(key)
+   key=str(key)
+   key=key.replace('[','')
+   key=key.replace(']','')
    return key
 
-
+generate_key()
 @app.route('/', methods=['GET', 'POST'])
 def login():
     # Output message if something goes wrong...
@@ -169,24 +173,30 @@ def register():
 def chat():
 
     if(mess!=''):
-        #session['message']=mess
+       
         if request.method == 'POST' and 'dec' in request.form:
-            keylen=mess[0]+""+mess[1]
-            
+            #print(message,file=sys.stderr)
+            keylenlen=mess[0]
+            keylenen=int(keylenlen)
+
+            keylen=mess[1:keylenen+1]
             keylen=int(keylen)
-            key=mess[2:keylen+2]
             
+            key=mess[keylenen+1:keylenen+keylen+1]
+            
+            
+            print(key,file=sys.stderr)
             key=rsa.decrypt(key)
             #message=RT.decrypt(mess[keylen+2:],key)
-            message=RT.decryptMessage(key,mess[keylen+2:])
+            print(key,file=sys.stderr)
             
-
-            print(message,file=sys.stderr)
+            message=cipher.decrpyt(mess[keylen+1+keylenen:],key)
+            #print(message,file=sys.stderr)
             
 
             image=ast.literal_eval(message)
             image=np.array(image)
-            image=Image.fromarray((image).astype(np.uint8)).save("image.png")
+            image=Image.fromarray((image).astype(np.uint8)).save("static/image.png")
 
             #print(image,file=sys.stderr)
 
@@ -197,19 +207,12 @@ def chat():
         id=request.form['username']
         file = request.files['file']
         image=Image.open(file)
-        #data = asarray(image)
-        #data=str(data)
-        #data=data.strip('\n')
-        #data=base64.b64encode(file.read())
-        #data=np.array(image)
+       
         key=generate_key()
         data=np.array(image)
         data=data.tolist()
         
-
-        
-        #enc=RT.encryptMessage(key,str(data))
-        #enc=vig.cipherText(str(data),key)
+       
         enc=cipher.encrypt(str(data),key)
        
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
@@ -220,8 +223,9 @@ def chat():
             e=account.get('e')
             
             key=rsa.encrypt(key,e,n)
-            message=str(len(str(key)))+""+str(key)+""+str(enc)
             
+            message=str(len(str(len(str(key)))))+str(len(str(key)))+""+str(key)+""+str(enc)
+            print(len(str(key)),file=sys.stderr)
             client.do(message, str(account['hostname']))
         
         
@@ -233,7 +237,7 @@ def chat():
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cursor.execute('SELECT * FROM accounts WHERE username != %s', (session['username'],))
         account = cursor.fetchall()
-        return render_template('chat.html', username=session['username'],account=account)
+        return render_template('chat.html', username=session['username'],account=account,mess=mess)
     # User is not loggedin redirect to login page
     return redirect(url_for('login'))
 

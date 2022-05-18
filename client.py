@@ -5,14 +5,12 @@ import time
 def do(message,host):
     s = socket.socket()
     host = host
-    port = 8080
+    port = 9090
     s.connect((host,port))
     print(" Connected to chat server")
     incoming_message = s.recv(1024)
     incoming_message = incoming_message.decode()
-    print(" Server : ", incoming_message)
-    print("")
+   
     message = message.encode()
     s.send(message)
-    print("message has been sent...")
-    print("")
+    s.close()

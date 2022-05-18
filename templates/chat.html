@@ -43,17 +43,25 @@
     <div class="container">
         <form id="contact" action="{{ url_for('chat') }}" method="post" enctype="multipart/form-data">
             <h3>Decrypt image</h3>
+            {% if mess !='' %}
+
+            <img src="{{url_for('static', filename='image.png')}}"  style="height: 200px; margin: 4px;"/>
+            {% endif %}
+            
             <!-- {% if session['message'] !='' %}
             <p>You have an Image in Inbox</p>
             <br>
             
             {% endif %} -->
             <input name="dec" value="yes" type="hidden">
-            <img href="../image.png" style="height: 200px; margin: 4px;" />
             <br>
+            <br>
+            {% if mess !='' %}
+            <P>Message Available</P>
             <fieldset>
                 <button type="submit" value="Upload" id="contact-submit" data-submit="...Sending">Decrypt</button>
             </fieldset>
+            {% endif %}
         </form>
     </div>
 

@@ -9,7 +9,11 @@ numbers=[0,1,2,3,4,5,6,7,8,9]
 
 
 def encrypt(message,key):
+    key2=key.split(',')
+    
+    key=[int(i) for i in key2]
     n=['1','2','3','4','5','6','7','8','9','0']
+    numbers=[0,1,2,3,4,5,6,7,8,9]
     ciphertext=''
     for i in range(len(message)):
         if(message[i] in n):
@@ -20,10 +24,12 @@ def encrypt(message,key):
 
     return ciphertext
 
-def decrpyt(ciphertext,numbers,key):
+def decrpyt(ciphertext,key):
     message=''
+    key2=key.split(',')
+    key=[int(i) for i in key2]
     n=['1','2','3','4','5','6','7','8','9','0']
-
+    numbers=[0,1,2,3,4,5,6,7,8,9]
     for i in range(len(ciphertext)):
         if(ciphertext[i] in n):
             for j in range(len(key)):

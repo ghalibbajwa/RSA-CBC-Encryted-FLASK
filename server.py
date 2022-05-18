@@ -12,7 +12,7 @@ import main
 def do(): 
     s = socket.socket()
     host = socket.gethostname()
-    port = 8080
+    port = 9090
     s.bind((host,port))
     s.listen(1)
     conn, addr = s.accept()
@@ -22,6 +22,4 @@ def do():
     incoming_message = incoming_message.decode()
     if(incoming_message != ''):
         main.put_session(incoming_message)
-    
-    print(" Client : ", incoming_message)
-    print("")
+   
