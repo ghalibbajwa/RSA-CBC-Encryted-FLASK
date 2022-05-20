@@ -21,13 +21,11 @@ from PIL import Image
 import numpy as np
 import string    
 import random
-import RowTranspose.RT as RT
 import concurrent.futures
 from multiprocessing.pool import ThreadPool
 import sys
 import ast
 import base64
-import Vig.vig as vig
 import io
 import socket
 import Cipher.cipher as cipher
@@ -88,7 +86,7 @@ def login():
         account =cursor.fetchone()
         
         if account:
-            hostname = socket.gethostname()
+            hostname = socket.gethostbyname(socket.gethostname())
             cursor.execute('UPDATE accounts SET hostname = %s WHERE id = %s', (hostname,account['id'],))
             mysql.connection.commit()
             # Create session data, we can access this data in other routes
@@ -147,14 +145,14 @@ def register():
             e = int(fo.readline())
             fo.close()
             os.remove("public_keys.txt")
-            cursor.execute('INSERT INTO accounts VALUES (NULL, %s, %s, %s,%s,%s)', (username, password, email, n, e))
+            cursor.execute('INSERT INTO accounts VALUES (NULL, %s, %s, %s,%s,%s,NULL)', (username, password, email, n, e))
             mysql.connection.commit()
             file=open("private_keys.txt","r")
             v=file.readline()
             w=file.readline()
             file.close()
             file=v+""+w
-            os.remove("private_keys.txt")
+            #os.remove("private_keys.txt")
             msg = 'You have successfully registered!'
             #return send_file('private_keys.txt', attachment_filename='private_keys.txt')
     elif request.method == 'POST':
