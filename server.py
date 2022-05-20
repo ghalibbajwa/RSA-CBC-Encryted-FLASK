@@ -12,8 +12,9 @@ import os
  
 def do(): 
     s = socket.socket()
+    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     host = os.environ.get('ip')
-    port = 9091
+    port = 9090
     s.bind((host,port))
     s.listen(1)
     conn, addr = s.accept()

@@ -4,6 +4,7 @@ import time
  
 def do(message,host):
     s = socket.socket()
+    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     host = host
     port = 9090
     s.connect((host,port))
