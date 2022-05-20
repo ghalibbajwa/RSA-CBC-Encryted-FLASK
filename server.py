@@ -4,15 +4,16 @@ import socket
 import sys
 import time
 import main
- 
+import os
+
 ## end of imports ###
  
 ### init ###
  
 def do(): 
     s = socket.socket()
-    host = socket.gethostname()
-    port = 9090
+    host = os.environ.get('ip')
+    port = 9091
     s.bind((host,port))
     s.listen(1)
     conn, addr = s.accept()

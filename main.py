@@ -39,7 +39,7 @@ app.run(debug=True)
 app.secret_key = 'your secret key'
 
 # Enter your database connection details below
-app.config['MYSQL_HOST'] = 'localhost'
+app.config['MYSQL_HOST'] = os.environ.get('DATABASE_URL')
 app.config['MYSQL_USER'] = 'root'
 app.config['MYSQL_PASSWORD'] = ''
 app.config['MYSQL_DB'] = 'cryto'
@@ -86,7 +86,7 @@ def login():
         account =cursor.fetchone()
         
         if account:
-            hostname = socket.gethostbyname(socket.gethostname())
+            hostname = os.environ.get('ip')
             cursor.execute('UPDATE accounts SET hostname = %s WHERE id = %s', (hostname,account['id'],))
             mysql.connection.commit()
             # Create session data, we can access this data in other routes
